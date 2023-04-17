@@ -162,13 +162,15 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
      * @param stdClass $instance enrolment instance
      * @param stdClass $data data needed for enrolment.
      */
-    public function enrol_self(stdClass $instance, $data = null, $childcall = false) {
+    public function enrol_self(stdClass $instance, $data = null) {
         global $DB, $USER, $CFG;
 
-        if ($instance->customint7 && !$childcall) {
+        if ($instance->customint7) {
             $this->enrol_self($DB->get_record('enrol', ['id' => $instance->customint7]), $data);
             return;
         }
+
+        $linkedinstances = $this->get_linked_instances($instance);
 
         // Don't enrol user if password is not passed when required.
         if ($instance->password && !isset($data->enrolpassword)) {
@@ -183,12 +185,15 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
 
         $this->enrol_user($instance, $USER->id, $instance->roleid, $timestart, $timeend);
+        foreach ($linkedinstances as $linkedinstance) {
+            $this->enrol_user($linkedinstance, $USER->id, $instance->roleid, $timestart, $timeend);
+        }
 
         \core\notification::success(get_string('youenrolledincourse', 'enrol'));
 
         if ($instance->password and $instance->customint1 and $data->enrolpassword !== $instance->password) {
             // It must be a group enrolment, let's assign group too.
-            $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey');
+            $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey, name');
             foreach ($groups as $group) {
                 if (empty($group->enrolmentkey)) {
                     continue;
@@ -197,16 +202,22 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
                     // Add user to group.
                     require_once($CFG->dirroot.'/group/lib.php');
                     groups_add_member($group->id, $USER->id);
+                    foreach ($linkedinstances as $linkedinstance) {
+                        $linkedgroup = $DB->get_record('groups', ['courseid' => $linkedinstance->courseid, 'name' => $group->name], 'id');
+                        if (!$linkedgroup) {
+                            $group = $DB->get_record('groups', ['id' => $group->id]);
+                            $group->courseid = $linkedinstance->courseid;
+                            $linkedgroup = new stdClass();
+                            $linkedgroup->id = groups_create_group($group);
+                        }
+                        groups_add_member($linkedgroup->id, $USER->id);
+                    }
                     break;
                 }
             }
         }
 
         if (!$instance->customint7) {
-            foreach ($this->get_linked_instances($instance)  as $linkedinstance) {
-                $this->enrol_self($linkedinstance, $data, true);
-            }
-
             // Send welcome message.
             if ($instance->customint4 != ENROL_DO_NOT_SEND_EMAIL) {
                 $this->email_welcome_message($instance, $USER);
@@ -228,7 +239,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         if (true === $enrolstatus) {
             // This user can self enrol using this instance.
-            $form = new enrol_self_enrol_form(null, $instance);
+            $form = new \enrol_linkedgroups\enrol_form(null, $instance);
             $instanceid = optional_param('instance', 0, PARAM_INT);
             if ($instance->id == $instanceid) {
                 if ($data = $form->get_data()) {
@@ -371,21 +382,6 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             $instanceinfo->wsfunction = 'enrol_self_get_instance_info';
         }
         return $instanceinfo;
-    }
-
-    /**
-     * Add new instance of enrol plugin with default settings.
-     * @param stdClass $course
-     * @return int id of new instance
-     */
-    public function add_default_instance($course) {
-        $fields = $this->get_instance_defaults();
-
-        if ($this->get_config('requirepassword')) {
-            $fields['password'] = generate_password(20);
-        }
-
-        return $this->add_instance($course, $fields);
     }
 
     /**
