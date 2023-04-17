@@ -217,11 +217,9 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             }
         }
 
-        if (!$instance->customint7) {
-            // Send welcome message.
-            if ($instance->customint4 != ENROL_DO_NOT_SEND_EMAIL) {
-                $this->email_welcome_message($instance, $USER);
-            }
+        // Send welcome message.
+        if ($instance->customint4 != ENROL_DO_NOT_SEND_EMAIL) {
+            $this->email_welcome_message($instance, $USER);
         }
     }
 
@@ -354,34 +352,6 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
 
         return true;
-    }
-
-    /**
-     * Return information for enrolment instance containing list of parameters required
-     * for enrolment, name of enrolment plugin etc.
-     *
-     * @param stdClass $instance enrolment instance
-     * @return stdClass instance info.
-     */
-    public function get_enrol_info(stdClass $instance) {
-
-        $instanceinfo = new stdClass();
-        $instanceinfo->id = $instance->id;
-        $instanceinfo->courseid = $instance->courseid;
-        $instanceinfo->type = $this->get_name();
-        $instanceinfo->name = $this->get_instance_name($instance);
-        $instanceinfo->status = $this->can_self_enrol($instance);
-
-        if ($instance->password) {
-            $instanceinfo->requiredparam = new stdClass();
-            $instanceinfo->requiredparam->enrolpassword = get_string('password', 'enrol_self');
-        }
-
-        // If enrolment is possible and password is required then return ws function name to get more information.
-        if ((true === $instanceinfo->status) && $instance->password) {
-            $instanceinfo->wsfunction = 'enrol_self_get_instance_info';
-        }
-        return $instanceinfo;
     }
 
     /**
