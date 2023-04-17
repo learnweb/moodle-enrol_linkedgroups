@@ -46,7 +46,7 @@ if (!$plugin->get_unenrolself_link($instance)) {
     redirect(new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
-$PAGE->set_url('/enrol/self/unenrolself.php', ['enrolid' => $instance->id]);
+$PAGE->set_url('/enrol/linkedgroups/unenrolself.php', ['enrolid' => $instance->id]);
 $PAGE->set_title($plugin->get_instance_name($instance));
 
 if ($confirm and confirm_sesskey()) {

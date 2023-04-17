@@ -27,12 +27,12 @@ $string['pluginname_desc'] = 'Self enrolment that allows to be automatically enr
 
 $string['linkedcourses'] = 'Linked courses';
 
-$string['self:config'] = 'Configure self enrol instances';
-$string['self:enrolself'] = 'Self enrol in course';
-$string['self:holdkey'] = 'Appear as the self enrolment key holder';
-$string['self:manage'] = 'Manage enrolled users';
-$string['self:unenrol'] = 'Unenrol users from course';
-$string['self:unenrolself'] = 'Unenrol self from the course';
+$string['linkedgroups:config'] = 'Configure self enrol instances';
+$string['linkedgroups:enrolself'] = 'Self enrol in course';
+$string['linkedgroups:holdkey'] = 'Appear as the self enrolment key holder';
+$string['linkedgroups:manage'] = 'Manage enrolled users';
+$string['linkedgroups:unenrol'] = 'Unenrol users from course';
+$string['linkedgroups:unenrolself'] = 'Unenrol self from the course';
 
 $string['expirymessageenrollersubject'] = 'Self enrolment expiry notification';
 $string['expirymessageenrollerbody'] = 'Self enrolment in the course \'{$a->course}\' will expire within the next {$a->threshold} for the following users:

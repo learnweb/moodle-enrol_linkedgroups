@@ -355,6 +355,21 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
     }
 
     /**
+     * Add new instance of enrol plugin with default settings.
+     * @param stdClass $course
+     * @return int id of new instance
+     */
+    public function add_default_instance($course) {
+        $fields = $this->get_instance_defaults();
+
+        if ($this->get_config('requirepassword')) {
+            $fields['password'] = generate_password(20);
+        }
+
+        return $this->add_instance($course, $fields);
+    }
+
+    /**
      * Returns defaults for new instances.
      * @return array
      */
@@ -448,7 +463,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
 
-        $trace->output('Verifying self-enrolments...');
+        $trace->output('Verifying linkedgroups-enrolments...');
 
         $params = array('now'=>time(), 'useractive'=>ENROL_USER_ACTIVE, 'courselevel'=>CONTEXT_COURSE);
         $coursesql = "";
@@ -459,6 +474,26 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         // Note: the logic of self enrolment guarantees that user logged in at least once (=== u.lastaccess set)
         //       and that user accessed course at least once too (=== user_lastaccess record exists).
+
+        // First deal with users that did not log in for a really long time - they do not have user_lastaccess records.
+        $sql = "SELECT e.*, ue.userid
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = 'linkedgroups' AND e.customint2 > 0)
+                  JOIN {user} u ON u.id = ue.userid
+                 WHERE :now - u.lastaccess > e.customint2
+                       $coursesql";
+        $rs = $DB->get_recordset_sql($sql, $params);
+        foreach ($rs as $instance) {
+            $userid = $instance->userid;
+            unset($instance->userid);
+            $this->unenrol_user($instance, $userid);
+            $days = $instance->customint2 / DAYSECS;
+            $trace->output("unenrolling user $userid from course $instance->courseid " .
+                    "as they did not log in for at least $days days", 1);
+        }
+        $rs->close();
+
+        // Now unenrol from course user did not visit for a long time.
         $sql = "SELECT e.*, ue.userid
                   FROM {user_enrolments} ue
                   JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = 'linkedgroups' AND e.customint2 > 0)
@@ -476,7 +511,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
         $rs->close();
 
-        $trace->output('...user self-enrolment updates finished.');
+        $trace->output('...user linkedgroups-enrolment updates finished.');
         $trace->finished();
 
         $this->process_expirations($trace, $courseid);
@@ -952,7 +987,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             }
         }
 
-        $linkedcourseids = $fields['linkedcourses'];
+        $linkedcourseids = $fields['linkedcourses'] ?? [];
         unset($fields['linkedcourses']);
 
         if (!($id = parent::add_instance($course, $fields))) {
