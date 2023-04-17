@@ -489,26 +489,6 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         // Note: the logic of self enrolment guarantees that user logged in at least once (=== u.lastaccess set)
         //       and that user accessed course at least once too (=== user_lastaccess record exists).
-
-        // First deal with users that did not log in for a really long time - they do not have user_lastaccess records.
-        $sql = "SELECT e.*, ue.userid
-                  FROM {user_enrolments} ue
-                  JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = 'linkedgroups' AND e.customint2 > 0)
-                  JOIN {user} u ON u.id = ue.userid
-                 WHERE :now - u.lastaccess > e.customint2
-                       $coursesql";
-        $rs = $DB->get_recordset_sql($sql, $params);
-        foreach ($rs as $instance) {
-            $userid = $instance->userid;
-            unset($instance->userid);
-            $this->unenrol_user($instance, $userid);
-            $days = $instance->customint2 / DAYSECS;
-            $trace->output("unenrolling user $userid from course $instance->courseid " .
-                "as they did not log in for at least $days days", 1);
-        }
-        $rs->close();
-
-        // Now unenrol from course user did not visit for a long time.
         $sql = "SELECT e.*, ue.userid
                   FROM {user_enrolments} ue
                   JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = 'linkedgroups' AND e.customint2 > 0)

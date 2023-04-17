@@ -112,13 +112,13 @@ class enrol_form extends \moodleform {
         if ($instance->password) {
             if ($data['enrolpassword'] !== $instance->password) {
                 if ($instance->customint7) {
-                    $importantinstance = $DB->get_record('enrol', ['id' => $instance->customint7]);
+                    $originalinstance = $DB->get_record('enrol', ['id' => $instance->customint7]);
                 } else {
-                    $importantinstance = $instance;
+                    $originalinstance = $instance;
                 }
-                if ($importantinstance) {
+                if ($originalinstance) {
                     // Check group enrolment key.
-                    if (!enrol_self_check_group_enrolment_key($importantinstance->courseid, $data['enrolpassword'])) {
+                    if (!enrol_self_check_group_enrolment_key($originalinstance->courseid, $data['enrolpassword'])) {
                         // We can not hint because there are probably multiple passwords.
                         $errors['enrolpassword'] = get_string('passwordinvalid', 'enrol_self');
                     }

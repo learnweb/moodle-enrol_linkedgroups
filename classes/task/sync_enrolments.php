@@ -15,15 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Linked courses enrolment plugin version specification.
+ * Sync enrolments task.
  *
- * @package    enrol_linkedgroups
- * @copyright  2023 Justus Dieckmann WWU
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   enrol_linkedgroups
+ * @copyright 2023 Justus Dieckmann WWU
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace enrol_linkedgroups\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023041700;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022111800;        // Requires this Moodle version.
-$plugin->component = 'enrol_linkedgroups';      // Full name of the plugin (used for diagnostics)
+class sync_enrolments extends \core\task\scheduled_task {
+
+    /**
+     * Name for this task.
+     *
+     * @return string
+     */
+    public function get_name() {
+        return get_string('syncenrolmentstask', 'enrol_self');
+    }
+
+    /**
+     * Run task for syncing enrolments.
+     */
+    public function execute() {
+        $enrol = enrol_get_plugin('linkedgroups');
+        $trace = new \text_progress_trace();
+        $enrol->sync($trace);
+    }
+
+}

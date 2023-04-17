@@ -15,15 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Linked courses enrolment plugin version specification.
+ * Defines message providers for linkedgroups enrolments.
  *
- * @package    enrol_linkedgroups
+ * @package    enrol_self
  * @copyright  2023 Justus Dieckmann WWU
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$messageproviders = array (
 
-$plugin->version   = 2023041700;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022111800;        // Requires this Moodle version.
-$plugin->component = 'enrol_linkedgroups';      // Full name of the plugin (used for diagnostics)
+    'expiry_notification' => array(),
+
+);

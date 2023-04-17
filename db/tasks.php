@@ -15,15 +15,34 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Linked courses enrolment plugin version specification.
- *
- * @package    enrol_linkedgroups
- * @copyright  2023 Justus Dieckmann WWU
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Task definition for enrol_linkedgroups.
+ * @copyright 2023 Justus Dieckmann WWU
+ * @package   enrol_self
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023041700;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022111800;        // Requires this Moodle version.
-$plugin->component = 'enrol_linkedgroups';      // Full name of the plugin (used for diagnostics)
+$tasks = array(
+    array(
+        'classname' => '\enrol_linkedgroups\task\sync_enrolments',
+        'blocking' => 0,
+        'minute' => '*/10',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    ),
+    array(
+        'classname' => '\enrol_linkedgroups\task\send_expiry_notifications',
+        'blocking' => 0,
+        'minute' => '*/10',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+        'disabled' => 0
+    )
+);
+
