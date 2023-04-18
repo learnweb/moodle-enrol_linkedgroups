@@ -223,6 +223,15 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
     }
 
+    public function unenrol_user(stdClass $instance, $userid) {
+        if (!$instance->customint7) {
+            foreach ($this->get_linked_instances($instance) as $linkedinstance) {
+                parent::unenrol_user($linkedinstance, $userid);
+            }
+        }
+        parent::unenrol_user($instance, $userid);
+    }
+
     /**
      * Creates course enrol form, checks if form submitted
      * and enrols user if necessary. It can also redirect.
