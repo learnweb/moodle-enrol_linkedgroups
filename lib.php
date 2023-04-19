@@ -404,6 +404,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $fields['customint4']      = $this->get_config('sendcoursewelcomemessage');
         $fields['customint5']      = 0;
         $fields['customint6']      = $this->get_config('newenrols');
+        $fields['linkedcourses'] = [];
 
         return $fields;
     }
@@ -768,6 +769,12 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
         unset($instance->notifyall);
 
+        if (!isset($instance->linkedcourses)) {
+            $instance->linkedcourses = array_map(function($i) {
+                return $i->courseid;
+            }, $this->get_linked_instances($instance));
+        }
+
         $nameattribs = array('size' => '20', 'maxlength' => '255');
         $mform->addElement('text', 'name', get_string('custominstancename', 'enrol'), $nameattribs);
         $mform->setType('name', PARAM_TEXT);
@@ -793,6 +800,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $options = $this->get_groupkey_options();
         $mform->addElement('select', 'customint1', get_string('groupkey', 'enrol_self'), $options);
         $mform->addHelpButton('customint1', 'groupkey', 'enrol_self');
+
         $mform->addElement('course', 'linkedcourses', get_string('linkedcourses', 'enrol_linkedgroups'), [
                 'multiple' => true, 'requiredcapabilities' => ['moodle/course:update'],
                 'exclude' => [$context->get_course_context()->instanceid]
@@ -1048,7 +1056,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             } else {
                 $remainingcourseids[] = $linkedinstance->courseid;
                 foreach (self::updatefields as $updatefield) {
-                    $linkedinstance->$updatefield = $data->$updatefield;
+                    $linkedinstance->$updatefield = $data->$updatefield ?? $instance->$updatefield ?? null;
                 }
                 parent::update_instance($linkedinstance, new stdClass());
             }
@@ -1058,7 +1066,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             if (!in_array($linkedcourseid, $remainingcourseids)) {
                 $datacopy = [];
                 foreach (self::updatefields as $updatefield) {
-                    $datacopy[$updatefield] = $data->$updatefield;
+                    $datacopy[$updatefield] = $data->$updatefield ?? $instance->$updatefield ?? null;
                 }
                 $datacopy['customint7'] = $data->id;
                 $linkedcourse = get_course($linkedcourseid);
