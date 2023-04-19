@@ -25,7 +25,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     protected $lasternoller = null;
     protected $lasternollerinstanceid = 0;
-    private const updatefields = [
+    private const UPDATEFIELDS = [
             'enrol', 'status', 'name', 'enrolperiod', 'enrolstartdate', 'enroleenddate', 'expirynotify', 'expirythreshold',
             'notifyall', 'password', 'roleid', 'customint1', 'customint2', 'customint3', 'customint4', 'customint5', 'customint6'
     ];
@@ -53,7 +53,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
                 // would hide self-enrolment icons from guests.
                 continue;
             }
-            if ($instance->password or $instance->customint1) {
+            if ($instance->password || $instance->customint1) {
                 $key = true;
             } else {
                 $nokey = true;
@@ -79,13 +79,13 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         global $DB;
 
         if (empty($instance->name)) {
-            if (!empty($instance->roleid) and $role = $DB->get_record('role', array('id'=>$instance->roleid))) {
+            if (!empty($instance->roleid) && ($role = $DB->get_record('role', array('id' => $instance->roleid)))) {
                 $role = ' (' . role_get_name($role, context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
             } else {
                 $role = '';
             }
             $enrol = $this->get_name();
-            return get_string('pluginname', 'enrol_'.$enrol) . $role;
+            return get_string('pluginname', 'enrol_' . $enrol) . $role;
         } else {
             return format_string($instance->name);
         }
@@ -124,7 +124,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
     public function can_add_instance($courseid) {
         $context = context_course::instance($courseid, MUST_EXIST);
 
-        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/linkedgroups:config', $context)) {
+        if (!has_capability('moodle/course:enrolconfig', $context) || !has_capability('enrol/linkedgroups:config', $context)) {
             return false;
         }
 
@@ -134,6 +134,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
     /**
      * Return whether, given the current state, it is possible to edit an instance
      * of this enrolment plugin in the course.
+     *
      * @param stdClass $instance
      * @return boolean
      */
@@ -146,6 +147,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     /**
      * Don't return an edit item if this is a linked instance.
+     *
      * @param stdClass $instance
      * @return array
      */
@@ -191,19 +193,20 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         \core\notification::success(get_string('youenrolledincourse', 'enrol'));
 
-        if ($instance->password and $instance->customint1 and $data->enrolpassword !== $instance->password) {
+        if ($instance->password && $instance->customint1 && $data->enrolpassword !== $instance->password) {
             // It must be a group enrolment, let's assign group too.
-            $groups = $DB->get_records('groups', array('courseid'=>$instance->courseid), 'id', 'id, enrolmentkey, name');
+            $groups = $DB->get_records('groups', array('courseid' => $instance->courseid), 'id', 'id, enrolmentkey, name');
             foreach ($groups as $group) {
                 if (empty($group->enrolmentkey)) {
                     continue;
                 }
                 if ($group->enrolmentkey === $data->enrolpassword) {
                     // Add user to group.
-                    require_once($CFG->dirroot.'/group/lib.php');
+                    require_once($CFG->dirroot . '/group/lib.php');
                     groups_add_member($group->id, $USER->id);
                     foreach ($linkedinstances as $linkedinstance) {
-                        $linkedgroup = $DB->get_record('groups', ['courseid' => $linkedinstance->courseid, 'name' => $group->name], 'id');
+                        $linkedgroup =
+                                $DB->get_record('groups', ['courseid' => $linkedinstance->courseid, 'name' => $group->name], 'id');
                         if (!$linkedgroup) {
                             $group = $DB->get_record('groups', ['id' => $group->id]);
                             $group->courseid = $linkedinstance->courseid;
@@ -322,11 +325,11 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             return get_string('canntenrol', 'enrol_self');
         }
 
-        if ($instance->enrolstartdate != 0 and $instance->enrolstartdate > time()) {
+        if ($instance->enrolstartdate != 0 && $instance->enrolstartdate > time()) {
             return get_string('canntenrolearly', 'enrol_self', userdate($instance->enrolstartdate));
         }
 
-        if ($instance->enrolenddate != 0 and $instance->enrolenddate < time()) {
+        if ($instance->enrolenddate != 0 && $instance->enrolenddate < time()) {
             return get_string('canntenrollate', 'enrol_self', userdate($instance->enrolenddate));
         }
 
@@ -365,6 +368,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     /**
      * Add new instance of enrol plugin with default settings.
+     *
      * @param stdClass $course
      * @return int id of new instance
      */
@@ -380,6 +384,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     /**
      * Returns defaults for new instances.
+     *
      * @return array
      */
     public function get_instance_defaults() {
@@ -392,18 +397,18 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
 
         $fields = array();
-        $fields['status']          = $this->get_config('status');
-        $fields['roleid']          = $this->get_config('roleid');
-        $fields['enrolperiod']     = $this->get_config('enrolperiod');
-        $fields['expirynotify']    = $expirynotify;
-        $fields['notifyall']       = $notifyall;
+        $fields['status'] = $this->get_config('status');
+        $fields['roleid'] = $this->get_config('roleid');
+        $fields['enrolperiod'] = $this->get_config('enrolperiod');
+        $fields['expirynotify'] = $expirynotify;
+        $fields['notifyall'] = $notifyall;
         $fields['expirythreshold'] = $this->get_config('expirythreshold');
-        $fields['customint1']      = $this->get_config('groupkey');
-        $fields['customint2']      = $this->get_config('longtimenosee');
-        $fields['customint3']      = $this->get_config('maxenrolled');
-        $fields['customint4']      = $this->get_config('sendcoursewelcomemessage');
-        $fields['customint5']      = 0;
-        $fields['customint6']      = $this->get_config('newenrols');
+        $fields['customint1'] = $this->get_config('groupkey');
+        $fields['customint2'] = $this->get_config('longtimenosee');
+        $fields['customint3'] = $this->get_config('maxenrolled');
+        $fields['customint4'] = $this->get_config('sendcoursewelcomemessage');
+        $fields['customint5'] = 0;
+        $fields['customint6'] = $this->get_config('newenrols');
         $fields['linkedcourses'] = [];
 
         return $fields;
@@ -419,11 +424,11 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
     protected function email_welcome_message($instance, $user) {
         global $CFG, $DB;
 
-        $course = $DB->get_record('course', array('id'=>$instance->courseid), '*', MUST_EXIST);
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         $context = context_course::instance($course->id);
 
         $a = new stdClass();
-        $a->coursename = format_string($course->fullname, true, array('context'=>$context));
+        $a->coursename = format_string($course->fullname, true, array('context' => $context));
         $a->profileurl = "$CFG->wwwroot/user/view.php?id=$user->id&course=$course->id";
 
         if (!is_null($instance->customtext1) && trim($instance->customtext1) !== '') {
@@ -437,7 +442,8 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
                 $messagehtml = text_to_html($messagetext, null, false, true);
             } else {
                 // This is most probably the tag/newline soup known as FORMAT_MOODLE.
-                $messagehtml = format_text($message, FORMAT_MOODLE, array('context'=>$context, 'para'=>false, 'newlines'=>true, 'filter'=>true));
+                $messagehtml = format_text($message, FORMAT_MOODLE,
+                        array('context' => $context, 'para' => false, 'newlines' => true, 'filter' => true));
                 $messagetext = html_to_text($messagehtml);
             }
         } else {
@@ -445,7 +451,8 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             $messagehtml = text_to_html($messagetext, null, false, true);
         }
 
-        $subject = get_string('welcometocourse', 'enrol_self', format_string($course->fullname, true, array('context'=>$context)));
+        $subject =
+                get_string('welcometocourse', 'enrol_self', format_string($course->fullname, true, array('context' => $context)));
 
         $sendoption = $instance->customint4;
         $contact = $this->get_welcome_email_contact($sendoption, $context);
@@ -475,7 +482,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         $trace->output('Verifying linkedgroups-enrolments...');
 
-        $params = array('now'=>time(), 'useractive'=>ENROL_USER_ACTIVE, 'courselevel'=>CONTEXT_COURSE);
+        $params = array('now' => time(), 'useractive' => ENROL_USER_ACTIVE, 'courselevel' => CONTEXT_COURSE);
         $coursesql = "";
         if ($courseid) {
             $coursesql = "AND e.courseid = :courseid";
@@ -483,7 +490,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
 
         // Note: the logic of self enrolment guarantees that user logged in at least once (=== u.lastaccess set)
-        //       and that user accessed course at least once too (=== user_lastaccess record exists).
+        // ... and that user accessed course at least once too (=== user_lastaccess record exists).
 
         // First deal with users that did not log in for a really long time - they do not have user_lastaccess records.
         $sql = "SELECT e.*, ue.userid
@@ -517,7 +524,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             $this->unenrol_user($instance, $userid);
             $days = $instance->customint2 / DAYSECS;
             $trace->output("unenrolling user $userid from course $instance->courseid " .
-                "as they did not access the course for at least $days days", 1);
+                    "as they did not access the course for at least $days days", 1);
         }
         $rs->close();
 
@@ -542,11 +549,11 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
     protected function get_enroller($instanceid) {
         global $DB;
 
-        if ($this->lasternollerinstanceid == $instanceid and $this->lasternoller) {
+        if ($this->lasternollerinstanceid == $instanceid && $this->lasternoller) {
             return $this->lasternoller;
         }
 
-        $instance = $DB->get_record('enrol', array('id'=>$instanceid, 'enrol'=>$this->get_name()), '*', MUST_EXIST);
+        $instance = $DB->get_record('enrol', array('id' => $instanceid, 'enrol' => $this->get_name()), '*', MUST_EXIST);
         $context = context_course::instance($instance->courseid);
 
         if ($users = get_enrolled_users($context, 'enrol/linkedgroups:manage')) {
@@ -576,26 +583,24 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
             $merge = false;
         } else {
             $merge = array(
-                'courseid'   => $data->courseid,
-                'enrol'      => $this->get_name(),
-                'status'     => $data->status,
-                'roleid'     => $data->roleid,
+                    'courseid' => $data->courseid,
+                    'enrol' => $this->get_name(),
+                    'status' => $data->status,
+                    'roleid' => $data->roleid,
             );
         }
-        if ($merge and $instances = $DB->get_records('enrol', $merge, 'id')) {
+        if ($merge && $instances = $DB->get_records('enrol', $merge, 'id')) {
             $instance = reset($instances);
             $instanceid = $instance->id;
         } else {
             if (!empty($data->customint5)) {
-                if ($step->get_task()->is_samesite()) {
-                    // Keep cohort restriction unchanged - we are on the same site.
-                } else {
+                if (!$step->get_task()->is_samesite()) {
                     // Use some id that can not exist in order to prevent self enrolment,
                     // because we do not know what cohort it is in this site.
                     $data->customint5 = -1;
                 }
             }
-            $instanceid = $this->add_instance($course, (array)$data);
+            $instanceid = $this->add_instance($course, (array) $data);
         }
         $step->set_mapping('enrol', $oldid, $instanceid);
     }
@@ -676,8 +681,8 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
      * @return array
      */
     protected function get_status_options() {
-        $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                         ENROL_INSTANCE_DISABLED => get_string('no'));
+        $options = array(ENROL_INSTANCE_ENABLED => get_string('yes'),
+                ENROL_INSTANCE_DISABLED => get_string('no'));
         return $options;
     }
 
@@ -708,8 +713,8 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
      */
     protected function get_expirynotify_options() {
         $options = array(0 => get_string('no'),
-                         1 => get_string('expirynotifyenroller', 'enrol_self'),
-                         2 => get_string('expirynotifyall', 'enrol_self'));
+                1 => get_string('expirynotifyenroller', 'enrol_self'),
+                2 => get_string('expirynotifyall', 'enrol_self'));
         return $options;
     }
 
@@ -718,40 +723,22 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
      *
      * @return array
      */
-    protected function get_longtimenosee_options() {
+    public static function get_longtimenosee_options() {
         $options = array(0 => get_string('never'),
-                         1800 * 3600 * 24 => get_string('numdays', '', 1800),
-                         1000 * 3600 * 24 => get_string('numdays', '', 1000),
-                         365 * 3600 * 24 => get_string('numdays', '', 365),
-                         180 * 3600 * 24 => get_string('numdays', '', 180),
-                         150 * 3600 * 24 => get_string('numdays', '', 150),
-                         120 * 3600 * 24 => get_string('numdays', '', 120),
-                         90 * 3600 * 24 => get_string('numdays', '', 90),
-                         60 * 3600 * 24 => get_string('numdays', '', 60),
-                         30 * 3600 * 24 => get_string('numdays', '', 30),
-                         21 * 3600 * 24 => get_string('numdays', '', 21),
-                         14 * 3600 * 24 => get_string('numdays', '', 14),
-                         7 * 3600 * 24 => get_string('numdays', '', 7));
+                1800 * 3600 * 24 => get_string('numdays', '', 1800),
+                1000 * 3600 * 24 => get_string('numdays', '', 1000),
+                365 * 3600 * 24 => get_string('numdays', '', 365),
+                180 * 3600 * 24 => get_string('numdays', '', 180),
+                150 * 3600 * 24 => get_string('numdays', '', 150),
+                120 * 3600 * 24 => get_string('numdays', '', 120),
+                90 * 3600 * 24 => get_string('numdays', '', 90),
+                60 * 3600 * 24 => get_string('numdays', '', 60),
+                30 * 3600 * 24 => get_string('numdays', '', 30),
+                21 * 3600 * 24 => get_string('numdays', '', 21),
+                14 * 3600 * 24 => get_string('numdays', '', 14),
+                7 * 3600 * 24 => get_string('numdays', '', 7));
         return $options;
     }
-
-    /**
-     * The self enrollment plugin has several bulk operations that can be performed.
-     * @param course_enrolment_manager $manager
-     * @return array
-     */
-    /*public function get_bulk_operations(course_enrolment_manager $manager) {
-        global $CFG;
-        $context = $manager->get_context();
-        $bulkoperations = array();
-        if (has_capability("enrol/linkedgroups:manage", $context)) {
-            $bulkoperations['editselectedusers'] = new enrol_self_editselectedusers_operation($manager, $this);
-        }
-        if (has_capability("enrol/linkedgroups:unenrol", $context)) {
-            $bulkoperations['deleteselectedusers'] = new enrol_self_deleteselectedusers_operation($manager, $this);
-        }
-        return $bulkoperations;
-    }*/
 
     /**
      * Add elements to the edit instance form.
@@ -764,7 +751,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         global $CFG, $DB;
 
         // Merge these two settings to one value for the single selection element.
-        if ($instance->notifyall and $instance->expirynotify) {
+        if ($instance->notifyall && $instance->expirynotify) {
             $instance->expirynotify = 2;
         }
         unset($instance->notifyall);
@@ -792,7 +779,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $passattribs = array('size' => '20', 'maxlength' => '50');
         $mform->addElement('passwordunmask', 'password', get_string('password', 'enrol_self'), $passattribs);
         $mform->addHelpButton('password', 'password', 'enrol_self');
-        if (empty($instance->id) and $this->get_config('requirepassword')) {
+        if (empty($instance->id) && $this->get_config('requirepassword')) {
             $mform->addRule('password', get_string('required'), 'required', null, 'client');
         }
         $mform->addRule('password', get_string('maximumchars', '', 50), 'maxlength', 50, 'server');
@@ -832,7 +819,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $mform->setDefault('enrolenddate', 0);
         $mform->addHelpButton('enrolenddate', 'enrolenddate', 'enrol_self');
 
-        $options = $this->get_longtimenosee_options();
+        $options = self::get_longtimenosee_options();
         $mform->addElement('select', 'customint2', get_string('longtimenosee', 'enrol_self'), $options);
         $mform->addHelpButton('customint2', 'longtimenosee', 'enrol_self');
 
@@ -840,15 +827,15 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $mform->addHelpButton('customint3', 'maxenrolled', 'enrol_self');
         $mform->setType('customint3', PARAM_INT);
 
-        require_once($CFG->dirroot.'/cohort/lib.php');
+        require_once($CFG->dirroot . '/cohort/lib.php');
 
         $cohorts = array(0 => get_string('no'));
         $allcohorts = cohort_get_available_cohorts($context, 0, 0, 0);
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
             $c = $DB->get_record('cohort',
-                                 array('id' => $instance->customint5),
-                                 'id, name, idnumber, contextid, visible',
-                                 IGNORE_MISSING);
+                    array('id' => $instance->customint5),
+                    'id, name, idnumber, contextid, visible',
+                    IGNORE_MISSING);
             if ($c) {
                 // Current cohort was not found because current user can not see it. Still keep it.
                 $allcohorts[$instance->customint5] = $c;
@@ -857,7 +844,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         foreach ($allcohorts as $c) {
             $cohorts[$c->id] = format_string($c->name, true, array('context' => context::instance_by_id($c->contextid)));
             if ($c->idnumber) {
-                $cohorts[$c->id] .= ' ['.s($c->idnumber).']';
+                $cohorts[$c->id] .= ' [' . s($c->idnumber) . ']';
             }
         }
         if ($instance->customint5 && !isset($allcohorts[$instance->customint5])) {
@@ -928,8 +915,8 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
         if ($checkpassword) {
             $require = $this->get_config('requirepassword');
-            $policy  = $this->get_config('usepasswordpolicy');
-            if ($require and trim($data['password']) === '') {
+            $policy = $this->get_config('usepasswordpolicy');
+            if ($require && trim($data['password']) === '') {
                 $errors['password'] = get_string('required');
             } else if (!empty($data['password']) && $policy) {
                 $errmsg = '';
@@ -940,12 +927,12 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         }
 
         if ($data['status'] == ENROL_INSTANCE_ENABLED) {
-            if (!empty($data['enrolenddate']) and $data['enrolenddate'] < $data['enrolstartdate']) {
+            if (!empty($data['enrolenddate']) && $data['enrolenddate'] < $data['enrolstartdate']) {
                 $errors['enrolenddate'] = get_string('enrolenddaterror', 'enrol_self');
             }
         }
 
-        if ($data['expirynotify'] > 0 and $data['expirythreshold'] < 86400) {
+        if ($data['expirynotify'] > 0 && $data['expirythreshold'] < 86400) {
             $errors['expirythreshold'] = get_string('errorthresholdlow', 'core_enrol');
         }
 
@@ -962,21 +949,21 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         $context = context_course::instance($instance->courseid);
         $validroles = array_keys($this->extend_assignable_roles($context, $instance->roleid));
         $validexpirynotify = array_keys($this->get_expirynotify_options());
-        $validlongtimenosee = array_keys($this->get_longtimenosee_options());
+        $validlongtimenosee = array_keys(self::get_longtimenosee_options());
         $tovalidate = array(
-            'enrolstartdate' => PARAM_INT,
-            'enrolenddate' => PARAM_INT,
-            'name' => PARAM_TEXT,
-            'customint1' => $validgroupkey,
-            'customint2' => $validlongtimenosee,
-            'customint3' => PARAM_INT,
-            'customint4' => PARAM_INT,
-            'customint5' => PARAM_INT,
-            'customint6' => $validnewenrols,
-            'status' => $validstatus,
-            'enrolperiod' => PARAM_INT,
-            'expirynotify' => $validexpirynotify,
-            'roleid' => $validroles
+                'enrolstartdate' => PARAM_INT,
+                'enrolenddate' => PARAM_INT,
+                'name' => PARAM_TEXT,
+                'customint1' => $validgroupkey,
+                'customint2' => $validlongtimenosee,
+                'customint3' => PARAM_INT,
+                'customint4' => PARAM_INT,
+                'customint5' => PARAM_INT,
+                'customint6' => $validnewenrols,
+                'status' => $validstatus,
+                'enrolperiod' => PARAM_INT,
+                'expirynotify' => $validexpirynotify,
+                'roleid' => $validroles
         );
         if ($data['expirynotify'] != 0) {
             $tovalidate['expirythreshold'] = PARAM_INT;
@@ -989,6 +976,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     /**
      * Add new instance of enrol plugin.
+     *
      * @param object $course
      * @param array $fields instance fields
      * @return int id of new instance, null if can not be created
@@ -1022,6 +1010,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
 
     /**
      * Update instance of enrol plugin.
+     *
      * @param stdClass $instance
      * @param stdClass $data modified instance fields
      * @return boolean
@@ -1055,7 +1044,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
                 $this->delete_instance($linkedinstance);
             } else {
                 $remainingcourseids[] = $linkedinstance->courseid;
-                foreach (self::updatefields as $updatefield) {
+                foreach (self::UPDATEFIELDS as $updatefield) {
                     $linkedinstance->$updatefield = $data->$updatefield ?? $instance->$updatefield ?? null;
                 }
                 parent::update_instance($linkedinstance, new stdClass());
@@ -1065,7 +1054,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
         foreach ($linkedcourseids as $linkedcourseid) {
             if (!in_array($linkedcourseid, $remainingcourseids)) {
                 $datacopy = [];
-                foreach (self::updatefields as $updatefield) {
+                foreach (self::UPDATEFIELDS as $updatefield) {
                     $datacopy[$updatefield] = $data->$updatefield ?? $instance->$updatefield ?? null;
                 }
                 $datacopy['customint7'] = $data->id;
@@ -1130,7 +1119,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
                 do {
                     $userfieldsapi = \core_user\fields::for_name();
                     $allnames = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
-                    $rusers = get_role_users($croles[$i], $context, true, 'u.id,  u.confirmed, u.username, '. $allnames . ',
+                    $rusers = get_role_users($croles[$i], $context, true, 'u.id,  u.confirmed, u.username, ' . $allnames . ',
                     u.email, r.sortorder, ra.id', 'r.sortorder, ra.id ASC, ' . $sort, null, '', '', '', '', $sortparams);
                     $i++;
                 } while (empty($rusers) && !empty($croles[$i]));
@@ -1162,7 +1151,7 @@ class enrol_linkedgroups_plugin extends enrol_plugin {
  */
 function enrol_linkedgroups_get_fontawesome_icon_map() {
     return [
-        'enrol_linkedgroups:withkey' => 'fa-key',
-        'enrol_linkedgroups:withoutkey' => 'fa-sign-in',
+            'enrol_linkedgroups:withkey' => 'fa-key',
+            'enrol_linkedgroups:withoutkey' => 'fa-sign-in',
     ];
 }

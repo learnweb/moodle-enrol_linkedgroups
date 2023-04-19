@@ -49,7 +49,7 @@ if (!$plugin->get_unenrolself_link($instance)) {
 $PAGE->set_url('/enrol/linkedgroups/unenrolself.php', ['enrolid' => $instance->id]);
 $PAGE->set_title($plugin->get_instance_name($instance));
 
-if ($confirm and confirm_sesskey()) {
+if ($confirm && confirm_sesskey()) {
     $plugin->unenrol_user($instance, $USER->id);
 
     \core\notification::success(get_string('youunenrolledfromcourse', 'enrol', format_string($course->fullname, true,

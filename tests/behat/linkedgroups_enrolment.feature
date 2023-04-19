@@ -6,15 +6,15 @@ Feature: Users can auto-enrol themself in courses where linkedgroups enrolment i
 
   Background:
     Given the following "users" exist:
-      | username | firstname | lastname | email |
-      | teacher1 | Teacher | 1 | teacher1@example.com |
-      | student1 | Student | 1 | student1@example.com |
+      | username | firstname | lastname | email                |
+      | teacher1 | Teacher   | 1        | teacher1@example.com |
+      | student1 | Student   | 1        | student1@example.com |
     And the following "courses" exist:
       | fullname | shortname | format |
-      | Course 1 | C1 | topics |
+      | Course 1 | C1        | topics |
     And the following "course enrolments" exist:
-      | user | course | role |
-      | teacher1 | C1 | editingteacher |
+      | user     | course | role           |
+      | teacher1 | C1     | editingteacher |
     And I log in as "admin"
     And I navigate to "Plugins > Enrolments > Manage enrol plugins" in site administration
     And I click on "Enable" "link" in the "Linked courses and groups enrolment" "table_row"
@@ -49,7 +49,7 @@ Feature: Users can auto-enrol themself in courses where linkedgroups enrolment i
     Given I log in as "teacher1"
     When I add "Linked courses and groups enrolment" enrolment method in "Course 1" with:
       | Custom instance name | Test student enrolment |
-      | Enrolment key | moodle_rules |
+      | Enrolment key        | moodle_rules           |
     And I log out
     And I log in as "student1"
     And I am on "Course 1" course homepage
@@ -68,13 +68,13 @@ Feature: Users can auto-enrol themself in courses where linkedgroups enrolment i
   Scenario: Self-enrolment enabled requiring a group enrolment key
     Given I log in as "teacher1"
     When I add "Linked courses and groups enrolment" enrolment method in "Course 1" with:
-      | Custom instance name | Test student enrolment |
-      | Enrolment key | moodle_rules |
-      | Use group enrolment keys | Yes |
+      | Custom instance name     | Test student enrolment |
+      | Enrolment key            | moodle_rules           |
+      | Use group enrolment keys | Yes                    |
     And I am on the "Course 1" "groups" page
     And I press "Create group"
     And I set the following fields to these values:
-      | Group name | Group 1 |
+      | Group name    | Group 1             |
       | Enrolment key | Test-groupenrolkey1 |
     And I press "Save changes"
     And I log out

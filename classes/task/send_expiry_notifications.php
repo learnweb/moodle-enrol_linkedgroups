@@ -24,8 +24,6 @@
 
 namespace enrol_linkedgroups\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 class send_expiry_notifications extends \core\task\scheduled_task {
 
     /**

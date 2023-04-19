@@ -44,7 +44,7 @@ class enrol_form extends \moodleform {
      * @return string form identifier
      */
     protected function get_form_identifier() {
-        $formid = $this->_customdata->id.'_'.get_class($this);
+        $formid = $this->_customdata->id . '_' . get_class($this);
         return $formid;
     }
 
@@ -61,7 +61,7 @@ class enrol_form extends \moodleform {
         if ($instance->password) {
             // Change the id of self enrolment key input as there can be multiple self enrolment methods.
             $mform->addElement('password', 'enrolpassword', get_string('password', 'enrol_self'),
-                    array('id' => 'enrolpassword_'.$instance->id));
+                    array('id' => 'enrolpassword_' . $instance->id));
             $context = context_course::instance($this->instance->courseid);
             $userfieldsapi = \core_user\fields::for_userpic();
             $ufields = $userfieldsapi->get_sql('u', false, '', '', false)->selects;
@@ -81,7 +81,7 @@ class enrol_form extends \moodleform {
                     $profilelink = fullname($keyholder);
                 }
                 $profilepic = $OUTPUT->user_picture($keyholder, array('size' => 35, 'courseid' => $this->instance->courseid));
-                $mform->addElement('static', 'keyholder'.$keyholdercount, '', $profilepic . $profilelink);
+                $mform->addElement('static', 'keyholder' . $keyholdercount, '', $profilepic . $profilelink);
             }
 
         } else {

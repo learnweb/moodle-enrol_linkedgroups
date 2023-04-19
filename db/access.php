@@ -25,56 +25,56 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    /* Add or edit enrol-self instance in course. */
-    'enrol/linkedgroups:config' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        )
-    ),
+        /* Add or edit enrol-self instance in course. */
+        'enrol/linkedgroups:config' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => array(
+                        'editingteacher' => CAP_ALLOW,
+                        'manager' => CAP_ALLOW,
+                )
+        ),
 
-    /* Manage user self-enrolments. */
-    'enrol/linkedgroups:manage' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        )
-    ),
+        /* Manage user self-enrolments. */
+        'enrol/linkedgroups:manage' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => array(
+                        'editingteacher' => CAP_ALLOW,
+                        'manager' => CAP_ALLOW,
+                )
+        ),
 
-    'enrol/linkedgroups:holdkey' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-    ),
+        'enrol/linkedgroups:holdkey' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+        ),
 
-    /* Voluntarily unenrol self from course - watch out for data loss. */
-    'enrol/linkedgroups:unenrolself' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'student' => CAP_ALLOW,
-        )
-    ),
+        /* Voluntarily unenrol self from course - watch out for data loss. */
+        'enrol/linkedgroups:unenrolself' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => array(
+                        'student' => CAP_ALLOW,
+                )
+        ),
 
-    /* Unenrol anybody from course (including self) -  watch out for data loss. */
-    'enrol/linkedgroups:unenrol' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        )
-    ),
+        /* Unenrol anybody from course (including self) -  watch out for data loss. */
+        'enrol/linkedgroups:unenrol' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => array(
+                        'editingteacher' => CAP_ALLOW,
+                        'manager' => CAP_ALLOW,
+                )
+        ),
 
-    /* Ability to enrol self in courses. */
-    'enrol/linkedgroups:enrolself' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'user' => CAP_ALLOW,
-        )
-    ),
+        /* Ability to enrol self in courses. */
+        'enrol/linkedgroups:enrolself' => array(
+                'captype' => 'write',
+                'contextlevel' => CONTEXT_COURSE,
+                'archetypes' => array(
+                        'user' => CAP_ALLOW,
+                )
+        ),
 ];

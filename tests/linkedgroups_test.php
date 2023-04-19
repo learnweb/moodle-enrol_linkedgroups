@@ -28,6 +28,7 @@ require_once($CFG->dirroot . '/enrol/linkedgroups/lib.php');
  * @group      enrol_linkedgroups
  * @copyright  2023 Justus Dieckmann WWU
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \enrol_linkedgroups\enrol_linkedgroups_plugin
  */
 class linkedgroups_test extends \advanced_testcase {
 
@@ -294,9 +295,7 @@ class linkedgroups_test extends \advanced_testcase {
         global $DB;
         $this->preventResetByRollback(); // Messaging does not like transactions...
 
-        /** @var $linkedgroupsplugin \enrol_linkedgroups_plugin */
         $linkedgroupsplugin = enrol_get_plugin('linkedgroups');
-        /** @var $manualplugin \enrol_manual_plugin */
         $manualplugin = enrol_get_plugin('manual');
         $now = time();
         $admin = get_admin();
@@ -462,7 +461,7 @@ class linkedgroups_test extends \advanced_testcase {
         $linkedgroupsplugin->send_expiry_notifications($trace);
         $this->assertEquals(0, $sink->count());
 
-        // use invalid notification hour to verify that before the hour the notifications are not sent.
+        // Use invalid notification hour to verify that before the hour the notifications are not sent.
         $linkedgroupsplugin->set_config('expirynotifylast', time() - 60 * 60 * 24);
         $linkedgroupsplugin->set_config('expirynotifyhour', '24');
 
@@ -478,7 +477,6 @@ class linkedgroups_test extends \advanced_testcase {
         global $DB, $CFG;
         $this->preventResetByRollback(); // Messaging does not like transactions...
 
-        /** @var $linkedgroupsplugin \enrol_linkedgroups_plugin */
         $linkedgroupsplugin = enrol_get_plugin('linkedgroups');
 
         $user1 = $this->getDataGenerator()->create_user();
@@ -772,42 +770,6 @@ class linkedgroups_test extends \advanced_testcase {
         $this->assertStringContainsString($error, $linkedgroupsplugin->is_self_enrol_available($instance));
         $this->setUser($user2);
         $this->assertEquals($canntenrolerror, $linkedgroupsplugin->is_self_enrol_available($instance));
-    }
-
-    /**
-     * Test enrol_self_check_group_enrolment_key
-     */
-    public function test_enrol_self_check_group_enrolment_key() {
-        global $DB;
-
-        // Test in course with groups.
-        $course = self::getDataGenerator()->create_course(array('groupmode' => SEPARATEGROUPS, 'groupmodeforce' => 1));
-
-        $group1 = $this->getDataGenerator()->create_group(array('courseid' => $course->id));
-        $group2 = $this->getDataGenerator()->create_group(array('courseid' => $course->id, 'enrolmentkey' => 'thepassword'));
-
-        $result = enrol_self_check_group_enrolment_key($course->id, 'invalidpassword');
-        $this->assertFalse($result);
-
-        $result = enrol_self_check_group_enrolment_key($course->id, 'thepassword');
-        $this->assertTrue($result);
-
-        // Test disabling group options.
-        $course->groupmode = NOGROUPS;
-        $course->groupmodeforce = 0;
-        $DB->update_record('course', $course);
-
-        $result = enrol_self_check_group_enrolment_key($course->id, 'invalidpassword');
-        $this->assertFalse($result);
-
-        $result = enrol_self_check_group_enrolment_key($course->id, 'thepassword');
-        $this->assertTrue($result);
-
-        // Test without groups.
-        $othercourse = self::getDataGenerator()->create_course();
-        $result = enrol_self_check_group_enrolment_key($othercourse->id, 'thepassword');
-        $this->assertFalse($result);
-
     }
 
     /**
